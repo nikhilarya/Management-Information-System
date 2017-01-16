@@ -1,0 +1,79 @@
+<?php 
+
+$cnm=  $this->sbasic_model->getCourseById($course_id);           
+$bnm=  $this->sbasic_model->getBranchById($branch_id);      
+
+?>
+<div class="row">
+	<div class="col-md-12 ">
+	<div class="box box-solid box-primary">
+                    <h2 align="center"> INDIAN SCHOOL OF MINES, DHANBAD</h2>
+                    <h2 align="center" class="page-header">Result Notification (<?php echo ucwords($exam_type)?>-<?php echo $sess?>-<?php echo $syear?>)</h2>
+              <h4><?php echo $sem;?> - Semester  - <?php echo $cnm->name;?> (<?php echo $bnm->name;?>)</h4>
+              <hr>
+              <h6>Following candidate(s) is/are declared to have Passed/Failed in the above mentioned examination. </h6>
+		</div>
+              <table class="table table-bordered table-striped" id="fy_show">
+		<thead>
+		<tr>
+			<td align="center">Sr.No</td>
+                        <td align="center">Adm No.</td>
+                        <td align="center">Student Name</td>
+                        <td align="center">GPA</td>
+                        <td align="center">Remarks</td>
+                        <td align="center">No.Failed Subjects</td>
+	
+		</tr>
+		</thead>
+		
+		<tbody>
+                    <?php
+                    $i = 0;
+                    foreach ($result_list as $b) {
+                        ?>
+                        <tr>
+                            <td align="center"><?php echo $i+1; ?></td>
+                            <td><?php echo ($b->admn_no); ?></td>
+                            <td><?php echo ($b->st_name); ?></td>
+                            <td align="center"><?php echo ($b->core_GPA); ?></td>
+                             <?php if ($b->core_status == "FAIL") { ?>
+                              <td align="center" width='12%'><?php echo ($b->core_status) . ':' . $b->core_fail_sub_list; ?></td>
+                            <?php } else { ?>
+                                <td align="center"><?php echo ($b->core_status); ?></td>
+                            <?php } ?>
+                            <td align="center"><?php echo $b->count_core_failed_sub;?> </td>
+                            
+
+                        </tr>
+                        <?php
+                        $i++;
+                    }
+                    ?>
+                </tbody>
+		
+		
+		</table>
+	
+	<!--</div>-->
+	
+</div>
+</div>
+
+
+<script>
+        $(function () {
+
+        $('#fy_show').dataTable();
+
+
+
+    });
+    </script>
+
+
+
+
+
+    
+
+

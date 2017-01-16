@@ -1,0 +1,109 @@
+<?php
+
+class Result_declaration_model extends CI_Model {
+
+    function __construct() {
+        // Call the Model constructor
+        parent::__construct();
+    }
+
+    function get_depart_details($id) {
+        $myquery = "select a.*,b.name as course_nm,c.name as branch_nm from subject_mapping a 
+inner join  courses b on a.course_id=b.id
+inner join  branches c on a.branch_id=c.id
+where session_year='2015-2016' and session='Monsoon'
+and dept_id='".$id."' and course_id!='honour' and course_id!='minor' order by course_nm,branch_nm,a.semester ";
+      
+        $query = $this->db->query($myquery);
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else {
+            return FALSE;
+        }
+    }
+    
+    function insert_result_declaration($data)
+    {
+        if($this->db->insert('result_declaration_log',$data))
+			return TRUE;
+		else
+			return FALSE;
+    }
+    
+    function get_published_status($sy,$sess,$did,$cid,$bid,$sem,$etype)
+    {
+       /* $myquery = "select * from result_declaration_log where s_year='".$sy."'
+and session='".$sem."' and exam_type='".$et."' and dept_id='".$did."' ";*/
+        
+        $myquery="select * from result_declaration_log where s_year='".$sy."'
+and session='".$sess."' and dept_id='".$did."' and course_id='".$cid."'
+and branch_id='".$bid."' and semester='".$sem."' and exam_type='".$etype."' order by id desc limit 1";
+      
+        $query = $this->db->query($myquery);
+
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        } else {
+            return FALSE;
+        }
+    }
+    
+    function update_decl_status($id)
+	{
+	$myquery="update result_declaration_log set status=0 where id=".$id;
+      
+        $query = $this->db->query($myquery);
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else {
+            return FALSE;
+        }	
+        
+        }
+		
+	
+        
+        function get_result_for_view($sy,$sess,$etype,$deptid,$sem,$cid,$bid)
+        {
+            
+            $myquery="   select concat_ws(' ',u.first_name,u.last_name) as st_name ,G.* from
+    ( select  x.admn_no, sum(x.totcrdpts) as core_tot,round(sum(x.totcrdpts)/sum(x.credit_hours),2) as core_GPA, 
+	  IF(  COUNT(DISTINCT CASE WHEN  x.grade = 'F' THEN 1  END),'FAIL', 'PASS')  as  core_status,	
+          	   SUM( IF ( x.grade = 'F', 1, 0))as  count_core_failed_sub,
+   	 GROUP_CONCAT(( IF(x.grade = 'F',x.sub,null) ) SEPARATOR ',') as  core_fail_sub_list
+	    from (
+      select grade_points.points ,  (grp.credit_hours*grade_points.points)  as totcrdpts , grp.* from
+     (select A.admn_no,A.grade,c.name,c.subject_id as  sub,c.credit_hours,   d.aggr_id,d.semester,d.sequence from 
+     (select a.admn_no,a.grade,b.subject_id, b.sub_map_id  from marks_subject_description as a
+     inner join marks_master as b on a.marks_master_id=b.id where b.session_year='".$sy."' and  session='".$sess."' and b.`type`='".$etype."') A 
+     inner join subjects as c on A.subject_id=c.id
+	  inner join course_structure as d on A.subject_id=d.id   
+	  inner join subject_mapping as e on A.sub_map_id = e.map_id where e.dept_id='".$deptid."' and e.semester='".$sem."' and  e.course_id='".$cid."' and e.branch_id='".$bid."'
+	   group by A.admn_no,A.subject_id )grp
+      left join grade_points on grade_points.grade=grp.grade  order by grp.admn_no, grp.semester,grp.sequence asc	  ) x
+      group by x.admn_no  order by x.admn_no )G
+      left join user_details u on u.id=G.admn_no";
+      
+            $query = $this->db->query($myquery);
+            
+
+            if ($query->num_rows() > 0) 
+            {
+                return $query->result();
+            } 
+            else
+            {
+                return FALSE;
+            }
+        }
+        
+   
+    
+    
+        
+        
+
+}
+?>

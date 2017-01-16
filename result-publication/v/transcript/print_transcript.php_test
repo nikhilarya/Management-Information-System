@@ -1,0 +1,83 @@
+<style>
+#result_data{
+	font-size: 8px;
+}
+hr { margin: 0.1em auto; }
+td { 
+    padding: 1px;
+}
+table {
+  border-collapse: collapse;
+}
+
+</style>
+<style type="text/css">
+
+
+    @media print {
+        div.divFooter {
+            position: relative;
+            margin-top:710px;
+            bottom: 0;
+        }
+    }
+    @page {
+    size: A4;
+    margin: 0;
+}
+</style>
+
+
+
+<?php
+$i=0;
+foreach ($data as $rec){ ?>
+<div class="bg" style="page-break-after: always;">
+<div class = "divHeader">
+
+<table width="100%" border="0">
+    <tr>
+        <td></td>
+        <td><img src="<?php echo base_url() ?>assets/images/ism/ism.jpg" width="85 " height="70" /></td>
+        <td></td>
+    </tr>
+</table>
+  <br>
+<hr/>
+
+	<table border = "0" align = "center" style = "width : 100%"> 
+	<!-- First Row -->
+            <tr>
+            	<td align="center" style="font-size: 8px;">
+            		<span style="font-size: 8px;font-weight:bold;">
+            			Name: 
+            		</span>
+                    <b><?php echo $rec['name_of_student']; ?></b>
+            	</td>
+            	<td align="center" style="font-size: 8px;">
+            		<span style="font-size: 8px;font-weight:bold;">
+            				Admn No. 
+            		</span>
+                    <b><?php echo ucwords($rec['admn_no']); ?></b>
+            	</td>
+         
+                	<td align="center" style="font-size: 8px;">
+            		<span style="font-size: 8px;font-weight:bold;">
+            				Course: 
+                                        </span>
+                    <b><?php echo $course_id; ?></b>
+            	</td>
+            	<td align="center" style="font-size: 8px;">
+            		<span style="font-size: 8px;font-weight:bold;">
+            				Branch: 
+            		</span>
+                    <b><?php echo $branch_id; ?></b>
+            	</td>
+            
+            </tr>
+    </table>
+<hr/>
+</div>
+</div>
+<?php } ?>
+ 

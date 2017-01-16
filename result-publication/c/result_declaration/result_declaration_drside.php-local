@@ -1,0 +1,269 @@
+<?php
+
+if (!defined('BASEPATH'))exit('No direct script access allowed');
+
+class Result_declaration_drside extends MY_Controller {
+
+    public function __construct() {
+        parent::__construct(array('exam_dr','hod','ft','hos'));
+                $this->addJS("exam_tabulation/exam_tabulation.js");
+                $this->load->model('exam_tabulation/exam_tabulation_model');
+        $this->load->model('exam_tabulation/exam_tabulation_config'); 
+         $this->load->model('result_declaration/result_declaration_model');
+        $this->load->model('subject_mapping/mapping');
+        $this->load->model('student_sem_form/sbasic_model');
+    }
+
+    public function index() {
+        
+         $this->load->model('departments_model');                        
+        $newObj=$this->departments_model->get_departments('academic');           
+        $deptList=Array();
+        $deptList['']='select';              
+        foreach($newObj as $row){                         
+             $deptList[$row->id]=$row->name;              
+        }
+            $deptList['comm']='Common';              
+        $data['deptList']=$deptList;
+        //print_r($deptList);     
+        $data['dept_sel']="";              
+    
+         
+        
+        $this->drawHeader("Result Declaration");
+        $this->load->view('result_declaration/result_declaration_drside',$data);
+        $this->drawFooter();
+         
+    }
+    function show_details()
+    {
+        
+        $sy=$this->input->post('session_year');
+        $sess=$this->input->post('session');
+        $et=$this->input->post('exm_type');
+      echo   $deptid=$this->input->post('dept');
+      echo   $sec_name=$this->input->post('section_name');
+        
+ 
+        /*
+         print_r($data['dept_list']);
+        die();
+        $array1=array(
+            'session_year'=>$sy,
+            'session'=>$sess,
+            'exam_type'=>$et,
+            'dept_id'=>$deptid,
+            'sec_nm'=>$sec_name          
+            
+            
+        );
+        
+        $this->session->set_userdata($array1); 
+         
+           
+         */
+        
+        
+        
+        //-------------------
+        
+        $this->load->model('departments_model');                        
+        $newObj=$this->departments_model->get_departments('academic');           
+        $deptList=Array();
+        $deptList['']='select';              
+        foreach($newObj as $row){                         
+             $deptList[$row->id]=$row->name;              
+        }
+       // $deptList['comm']='Common';              
+        $data['deptList']=$deptList;
+        //print_r($deptList);     
+        $data['dept_sel']="";              
+    
+        //--------------------------
+         /*if($et=='other'){
+            $data2['dept']=$deptid; $data2['sy']=$sy; $data2['s']=$sess;
+            $data['dept_list']=$this->result_declaration_model->Get_ohter_show_list($data2);            
+        }else{
+         $data['dept_list']=$this->result_declaration_model->get_depart_details($sy,$sess,$deptid,$et,$sec_name);     
+        }
+        */
+        $data['dept_list']=$this->result_declaration_model->get_depart_details($sy,$sess,$deptid,$et,$sec_name);     
+      
+        $data['s_year']=$sy;
+        $data['sess']=$sess;
+        $data['ex_type']=$et;
+        $data['dept_id']= $deptid ;
+        $data['sec_nm']= $sec_name ;  
+		
+        
+        //$data['pub_status']=$this->result_declaration_model->get_published_status($sy,$sess,$et,$deptid);           
+ //print_r($data);die();        
+        
+        
+        
+        
+        $this->drawHeader("Result Declaration");
+        $this->load->view('result_declaration/result_declaration_drside',$data);
+        $this->drawFooter();
+            
+        
+        }
+        function date_show()
+        {
+            $data['syear']=$this->input->post('vsy');
+            $data['sess']=$this->input->post('vsess');
+            $data['exam_type']=$this->input->post('vet');
+            $data['dept_id']=$this->input->post('vdid');
+            $data['sec_nm']=$this->input->post('vsec');
+            $data['course_id']=$this->input->post('vcid');
+            $data['branch_id']=$this->input->post('vbid');
+            $data['sem']=$this->input->post('vsem');
+            
+            //print_r($data); die();
+            
+            $this->load->view('result_declaration/show_date',$data);
+        }
+        
+        function show_data_for_viewPDF(){
+             
+            $data['syear']=$this->input->post('syear');
+            $data['sess']=$this->input->post('hsess');
+            $data['exam_type']=$this->input->post('hetype');
+            $data['dept_id']=$this->input->post('hdeptid');
+            $sec_nm= $data['sec_nm']=$this->input->post('hsec_name');
+            $data['course_id']=$this->input->post('hcid');
+            $data['branch_id']=$this->input->post('hbid');
+            $data['sem']=$this->input->post('hsem');
+           // print_r($data);die();
+             
+             
+             
+             
+            
+            
+            $sy=$this->input->post('syear');
+            $sess=$this->input->post('hsess');
+            $etype=$this->input->post('hetype');
+            if($etype=="regular"){
+                $etype='R';
+            }
+            $deptid=$this->input->post('hdeptid');
+            //$data['sec_nm']=$this->input->post('vsec');
+            $cid=$this->input->post('hcid');
+            $bid=$this->input->post('hbid');
+            $sem=$this->input->post('hsem');
+            
+ $data['result_list']=$this->result_declaration_model->get_result_for_view($sy,$sess,$etype,$deptid,$sem,$cid,$bid,$sec_nm);           
+  $data['stu_ctr']=count($data['result_list']);
+ 
+ 
+       
+              $this->load->helper(array('dompdf', 'file'));
+              $html= $this->load->view('result_declaration/view_show_data',$data,TRUE);
+             // echo $html;
+             pdf_create($html, 'RESULT_DECLARATION');
+        }
+        
+        function show_data_for_view()
+        {
+            
+            $data['syear']=$this->input->post('vsy');
+            $data['sess']=$this->input->post('vsess');
+            $data['exam_type']=$this->input->post('vet');
+            $data['dept_id']=$this->input->post('vdid');
+            $sec_nm=$data['sec_nm']=$this->input->post('vsec');
+            $data['course_id']=$this->input->post('vcid');
+            $data['branch_id']=$this->input->post('vbid');
+            $data['sem']=$this->input->post('vsem');
+           // print_r($data);die();
+             
+             
+             
+             
+            
+            
+            $sy=$this->input->post('vsy');
+            $sess=$this->input->post('vsess');
+            $etype=$this->input->post('vet');
+            if($etype=="regular"){
+                $etype='R';
+            }
+            $deptid=$this->input->post('vdid');
+            //$data['sec_nm']=$this->input->post('vsec');
+            $cid=$this->input->post('vcid');
+            $bid=$this->input->post('vbid');
+            $sem=$this->input->post('vsem');
+            
+ $data['result_list']=$this->result_declaration_model->get_result_for_view($sy,$sess,$etype,$deptid,$sem,$cid,$bid,$sec_nm);           
+  $data['stu_ctr']=count($data['result_list']);
+ 
+       $this->load->view('result_declaration/view_show_data',$data);
+       
+        
+       
+        }
+        function save_data()
+        {
+            date_default_timezone_set('Asia/Calcutta');
+            
+            $data['s_year']=$this->input->post('hsyear');
+            $data['session']=$this->input->post('hsess');
+            $data['exam_type']=$this->input->post('hetype');
+            $data['dept_id']=$this->input->post('hdeptid');
+            if($data['dept_id']=='comm')$data['section']=$this->input->post('hsec_name');
+            $data['course_id']=$this->input->post('hcid');
+            $data['branch_id']=$this->input->post('hbid');
+            $data['semester']=$this->input->post('hsem');
+            $data['published_by']=$this->session->userdata('id');
+            $data['published_on']=date('Y-m-d',strtotime($this->input->post('b_date')));
+            $data['actual_published_on']=date("Y-m-d H:i:s");
+            $data['status']="1";
+            
+            $r=$this->result_declaration_model->insert_result_declaration($data);
+            
+             if ($r)
+             {
+                       $this->session->set_flashdata('flashSuccess','Published.');
+                       redirect('/result_declaration/result_declaration_drside/', 'refresh');
+             }
+            
+        }
+        
+        function undo_record()
+        {
+            
+            $id=$this->input->post('rid');
+            
+            $r=$this->result_declaration_model->update_decl_status($id);
+            
+            echo $r;
+           
+        }
+        
+        
+        
+ function printPDF(){
+        
+            $data['master'] = $this->mp->getMarksMaster(array('id'=>$_POST['mid']));
+            $data['des']=$this->mp->getMarksDes(array('marks_master_id'=>$_POST['mid']));
+            //print_r($data); die();
+                    $this->load->helper(array('dompdf', 'file'));
+					//$html.=	$this->load->view('templates/header_assets');
+                      $html= $this->load->view('marks_submit/marks_print',$data,TRUE);
+                        pdf_create($html, 'MarksSheet');
+            
+         
+       }
+        public function get_section_common2($session_year)
+	{
+		$this->load->model('attendance/show_student');
+		$data['session_year']=$session_year;
+		$data['section']=$this->show_student->get_section2($session_year);		
+		$this->load->view('attendance/load_section',$data);
+                //json_encode($data);
+	}
+    
+
+}
+
+?>
